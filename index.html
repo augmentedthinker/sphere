@@ -13,12 +13,12 @@
       
       <!-- Asset Management System -->
       <a-assets>
-        <!-- Canvas-based gradient texture -->
-        <canvas id="gradient-canvas" width="1024" height="512"></canvas>
+        <!-- Pattern texture from GitHub repository -->
+        <img id="pattern-texture" src="https://raw.githubusercontent.com/augmentedthinker/sphere/main/pattern.png" crossorigin="anonymous">
       </a-assets>
 
       <!-- 
-        Spherical Room with Blue to Orange Gradient
+        Spherical Room with Pattern Texture
         - radius: 1.5 meters (3 meter diameter)
         - segments-width/height: Higher values for smoother sphere
         - side: back - This makes the texture appear on the inside of the sphere
@@ -27,42 +27,15 @@
       <a-sphere
         position="0 0 0"
         radius="1.5"
-        src="#gradient-canvas"
+        src="#pattern-texture"
         side="back"
         segments-width="64"
-        segments-height="32">
+        segments-height="32"
+        material="side: back; repeat: 4 2">
       </a-sphere>
 
       <!-- Add some ambient lighting to ensure visibility -->
       <a-light type="ambient" color="#ffffff" intensity="1.0"></a-light>
-      
-      <!-- JavaScript to create the gradient -->
-      <script>
-        // Wait for the scene to load
-        document.addEventListener('DOMContentLoaded', function() {
-          const canvas = document.getElementById('gradient-canvas');
-          const ctx = canvas.getContext('2d');
-          
-          // Create a radial gradient that covers the entire canvas
-          const centerX = canvas.width / 2;
-          const centerY = canvas.height / 2;
-          const radius = Math.max(canvas.width, canvas.height) / 2;
-          
-          const gradient = ctx.createRadialGradient(
-            centerX, centerY, 0,           // Inner circle (center)
-            centerX, centerY, radius       // Outer circle (edge)
-          );
-          
-          gradient.addColorStop(0, '#f97316');    // Orange center
-          gradient.addColorStop(0.4, '#fbbf24');  // Yellow-orange
-          gradient.addColorStop(0.7, '#3b82f6');  // Blue
-          gradient.addColorStop(1, '#1e3a8a');    // Deep blue edge
-          
-          // Fill the canvas with the gradient
-          ctx.fillStyle = gradient;
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-        });
-      </script>
 
       <!-- 
         Camera positioned at natural eye level in center of sphere
