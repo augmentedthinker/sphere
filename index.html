@@ -13,8 +13,8 @@
       
       <!-- Asset Management System -->
       <a-assets>
-        <!-- Replace this URL with your actual Escher pattern image from GitHub -->
-        <img id="escher-pattern" src="https://github.com/augmentedthinker/sphere/blob/main/pattern.png" crossorigin="anonymous">
+        <!-- Updated URL format for better compatibility -->
+        <img id="escher-pattern" src="https://raw.githubusercontent.com/augmentedthinker/sphere/main/pattern.png" crossorigin="anonymous">
       </a-assets>
 
       <!-- 
@@ -30,8 +30,15 @@
         src="#escher-pattern"
         side="back"
         segments-width="64"
-        segments-height="32">
+        segments-height="32"
+        material="side: back; transparent: false">
       </a-sphere>
+
+      <!-- Add some ambient lighting to ensure visibility -->
+      <a-light type="ambient" color="#404040" intensity="0.8"></a-light>
+      
+      <!-- Add a sky as fallback background -->
+      <a-sky color="#1a1a1a"></a-sky>
 
       <!-- 
         Camera positioned at natural eye level in center of sphere
