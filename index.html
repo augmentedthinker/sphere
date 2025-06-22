@@ -13,32 +13,48 @@
       
       <!-- Asset Management System -->
       <a-assets>
-        <!-- Updated URL format for better compatibility -->
-        <img id="escher-pattern" src="https://raw.githubusercontent.com/augmentedthinker/sphere/main/pattern.png" crossorigin="anonymous">
+        <!-- Canvas-based gradient texture -->
+        <canvas id="gradient-canvas" width="512" height="256"></canvas>
       </a-assets>
 
       <!-- 
-        Spherical Room
+        Spherical Room with Blue to Orange Gradient
         - radius: 1.5 meters (3 meter diameter)
-        - segments-width/height: Higher values for smoother sphere and better pattern mapping
+        - segments-width/height: Higher values for smoother sphere
         - side: back - This makes the texture appear on the inside of the sphere
         - The sphere is centered at 0,0,0 with the camera inside
       -->
       <a-sphere
         position="0 0 0"
         radius="1.5"
-        src="#escher-pattern"
+        src="#gradient-canvas"
         side="back"
         segments-width="64"
-        segments-height="32"
-        material="side: back; transparent: false">
+        segments-height="32">
       </a-sphere>
 
       <!-- Add some ambient lighting to ensure visibility -->
-      <a-light type="ambient" color="#404040" intensity="0.8"></a-light>
+      <a-light type="ambient" color="#ffffff" intensity="1.0"></a-light>
       
-      <!-- Add a sky as fallback background -->
-      <a-sky color="#1a1a1a"></a-sky>
+      <!-- JavaScript to create the gradient -->
+      <script>
+        // Wait for the scene to load
+        document.addEventListener('DOMContentLoaded', function() {
+          const canvas = document.getElementById('gradient-canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Create a beautiful blue to orange gradient
+          const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+          gradient.addColorStop(0, '#1e3a8a');    // Deep blue
+          gradient.addColorStop(0.3, '#3b82f6');  // Bright blue
+          gradient.addColorStop(0.7, '#f97316');  // Orange
+          gradient.addColorStop(1, '#ea580c');    // Deep orange
+          
+          // Fill the canvas with the gradient
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        });
+      </script>
 
       <!-- 
         Camera positioned at natural eye level in center of sphere
