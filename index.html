@@ -19,14 +19,14 @@
 
       <!-- 
         Spherical Room with Pattern Texture
-        - radius: 1.5 meters (3 meter diameter)
+        - radius: 3 meters (6 meter diameter) - doubled from 1.5m
         - segments-width/height: Higher values for smoother sphere
         - side: back - This makes the texture appear on the inside of the sphere
         - The sphere is centered at 0,0,0 with the camera inside
       -->
       <a-sphere
         position="0 0 0"
-        radius="1.5"
+        radius="3"
         src="#pattern-texture"
         side="back"
         segments-width="64"
@@ -38,12 +38,12 @@
       <a-light type="ambient" color="#ffffff" intensity="1.0"></a-light>
 
       <!-- 
-        Camera positioned at natural eye level in center of sphere
-        - position: 0 1.6 0 (1.6m is average eye height)
+        Camera positioned at center of sphere for better perspective
+        - position: 0 0 0 (centered in the sphere)
         - look-controls and wasd-controls enabled by default for VR and desktop testing
       -->
       <a-camera
-        position="0 1.6 0"
+        position="0 0 0"
         look-controls="enabled: true"
         wasd-controls="enabled: true">
       </a-camera>
