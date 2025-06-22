@@ -14,7 +14,7 @@
       <!-- Asset Management System -->
       <a-assets>
         <!-- Canvas-based gradient texture -->
-        <canvas id="gradient-canvas" width="512" height="256"></canvas>
+        <canvas id="gradient-canvas" width="1024" height="512"></canvas>
       </a-assets>
 
       <!-- 
@@ -43,12 +43,20 @@
           const canvas = document.getElementById('gradient-canvas');
           const ctx = canvas.getContext('2d');
           
-          // Create a beautiful blue to orange gradient
-          const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-          gradient.addColorStop(0, '#1e3a8a');    // Deep blue
-          gradient.addColorStop(0.3, '#3b82f6');  // Bright blue
-          gradient.addColorStop(0.7, '#f97316');  // Orange
-          gradient.addColorStop(1, '#ea580c');    // Deep orange
+          // Create a radial gradient that covers the entire canvas
+          const centerX = canvas.width / 2;
+          const centerY = canvas.height / 2;
+          const radius = Math.max(canvas.width, canvas.height) / 2;
+          
+          const gradient = ctx.createRadialGradient(
+            centerX, centerY, 0,           // Inner circle (center)
+            centerX, centerY, radius       // Outer circle (edge)
+          );
+          
+          gradient.addColorStop(0, '#f97316');    // Orange center
+          gradient.addColorStop(0.4, '#fbbf24');  // Yellow-orange
+          gradient.addColorStop(0.7, '#3b82f6');  // Blue
+          gradient.addColorStop(1, '#1e3a8a');    // Deep blue edge
           
           // Fill the canvas with the gradient
           ctx.fillStyle = gradient;
