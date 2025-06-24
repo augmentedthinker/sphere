@@ -2,16 +2,15 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Spherical VR Room - Escher Pattern with Music</title>
-    <meta name="description" content="An immersive spherical VR room with Escher-style patterns, built with A-Frame for Oculus Quest 2.">
-    <!-- Make it responsive for different devices -->
+    <title>Interactive VR Sphere</title>
+    <meta name="description" content="An interactive immersive spherical VR room with a mute/unmute feature.">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- A-Frame VR Framework -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 
     <style>
-      /* Style for the start screen overlay */
+      /* Styles for the start screen overlay */
       #start-screen {
         position: absolute;
         top: 0;
@@ -28,7 +27,6 @@
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         text-align: center;
       }
-      /* Style for the button on the start screen */
       #start-button {
         font-size: 1.5rem;
         padding: 1rem 2rem;
@@ -67,16 +65,11 @@
       
       <!-- Asset Management System -->
       <a-assets>
-        <!-- Pattern texture -->
         <img id="pattern-texture" src="https://raw.githubusercontent.com/augmentedthinker/sphere/main/pattern.png" crossorigin="anonymous">
-        <!-- Ambient music asset -->
-        <!-- Note: We removed preload="auto" as the script will handle loading -->
         <audio id="bg-music" src="music.mp3" loop="true"></audio>
       </a-assets>
 
-      <!-- 
-        Spherical Room with Pattern Texture
-      -->
+      <!-- Spherical Room -->
       <a-sphere
         position="0 0 0"
         radius="3"
@@ -84,15 +77,34 @@
         side="back"
         segments-width="64"
         segments-height="32"
-        material="side: back; repeat: 4 2">
+        material="side: back; repeat: 4 2;">
       </a-sphere>
 
       <!-- 
-        Ambient music entity.
-        - We give it an ID to easily select it with JavaScript.
-        - `autoplay` is removed because we control it via script.
-        - `positional: false` makes it non-spatial ambient sound.
+        NEW: Interactive Mute Orb
+        - It's a sphere positioned in front of the camera.
+        - The material has `shader: flat` for a clean look and `emissive` to make it glow.
+        - It has an ID so we can select it with JavaScript.
+        - The nested <a-animation> makes it gently bob up and down.
       -->
+      <a-sphere
+        id="mute-orb"
+        position="0 1.6 -2.5"
+        radius="0.2"
+        material="color: #00FFFF; shader: flat; emissive: #00FFFF; emissiveIntensity: 0.7; opacity: 0.8"
+        >
+          <a-animation
+            attribute="position"
+            from="0 1.55 -2.5"
+            to="0 1.65 -2.5"
+            direction="alternate"
+            dur="2000"
+            repeat="indefinite"
+            easing="ease-in-out-sine">
+          </a-animation>
+      </a-sphere>
+
+      <!-- Ambient music entity -->
       <a-entity id="ambient-music"
         sound="src: #bg-music; positional: false; loop: true; volume: 0.5">
       </a-entity>
@@ -101,10 +113,11 @@
       <a-light type="ambient" color="#ffffff" intensity="1.0"></a-light>
 
       <!-- 
-        Camera and cursor for interaction.
-        The raycaster is needed for the cursor to interact with objects.
+        Camera and Cursor
+        - The <a-cursor> is a child of the camera. It's what allows for gaze-based interaction.
+        - It will automatically show a ring when hovering over clickable objects.
       -->
-      <a-camera position="0 0 0">
+      <a-camera position="0 1.6 0">
         <a-cursor></a-cursor>
       </a-camera>
 
@@ -115,30 +128,50 @@
       window.onload = function() {
         const startScreen = document.getElementById('start-screen');
         const startButton = document.getElementById('start-button');
-        const musicEntity = document.getElementById('ambient-music');
-
+        
         // Add a click listener to the start button
         startButton.addEventListener('click', function() {
-          // Check if the sound component is ready
-          if (musicEntity.components.sound) {
-            // Play the sound programmatically
-            musicEntity.components.sound.playSound();
-          }
+          const musicEntity = document.getElementById('ambient-music');
+          const muteOrb = document.getElementById('mute-orb');
+
+          // --- Music State and Orb Interaction ---
+          let isMusicPlaying = false; // Music is initially off
+          const colorPlaying = '#00FFFF'; // Cyan
+          const colorPaused = '#FF5733';  // Warm Orange
+
+          // Function to start the music for the first time
+          const startMusic = () => {
+              if (musicEntity.components.sound && !isMusicPlaying) {
+                  musicEntity.components.sound.playSound();
+                  isMusicPlaying = true;
+                  muteOrb.setAttribute('material', 'color', colorPlaying);
+                  muteOrb.setAttribute('material', 'emissive', colorPlaying);
+              }
+          };
+
+          // --- Initialize Orb Interaction ---
+          muteOrb.addEventListener('click', function() {
+              if (isMusicPlaying) {
+                  musicEntity.components.sound.pauseSound();
+                  muteOrb.setAttribute('material', 'color', colorPaused);
+                  muteOrb.setAttribute('material', 'emissive', colorPaused);
+              } else {
+                  musicEntity.components.sound.playSound();
+                  muteOrb.setAttribute('material', 'color', colorPlaying);
+                  muteOrb.setAttribute('material', 'emissive', colorPlaying);
+              }
+              // Flip the state
+              isMusicPlaying = !isMusicPlaying;
+          });
           
-          // Hide the start screen
+          // --- Start Everything ---
+          startMusic();
           startScreen.style.display = 'none';
 
-          // Optional: Attempt to enter VR mode automatically after the click
-          // This provides a smoother experience on VR headsets.
+          // Attempt to enter VR mode
           const sceneEl = document.querySelector('a-scene');
-          if (sceneEl.is('vr-mode')) {
-             // Already in VR mode
-          } else if (sceneEl.is('ar-mode')) {
-            // Already in AR mode
-          } else {
-             sceneEl.enterVR().catch(function(err) {
-                 console.error("Could not enter VR mode:", err);
-             });
+          if (!sceneEl.is('vr-mode')) {
+             sceneEl.enterVR().catch(err => console.error("Could not enter VR mode:", err));
           }
         });
       };
