@@ -5,28 +5,54 @@
     <title>Spherical VR Room - Escher Pattern with Music</title>
     <meta name="description" content="An immersive spherical VR room with Escher-style patterns, built with A-Frame for Oculus Quest 2.">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
     <style>
+      /* Style for the start screen overlay */
       #start-screen {
         position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background-color: rgba(0, 0, 0, 0.85); color: white; z-index: 10000;
-        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.85);
+        color: white;
+        z-index: 10000;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         text-align: center;
       }
+      /* Style for the button on the start screen */
       #start-button {
-        font-size: 1.5rem; padding: 1rem 2rem;
-        border: 2px solid white; background-color: #1a1a1a; color: white;
-        border-radius: 8px; cursor: pointer; transition: background-color 0.3s, color 0.3s;
+        font-size: 1.5rem;
+        padding: 1rem 2rem;
+        border: 2px solid white;
+        background-color: #1a1a1a;
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s, color 0.3s;
       }
-      #start-button:hover { background-color: white; color: black; }
-      #start-screen h1 { font-size: 3rem; margin-bottom: 1rem; }
-      #start-screen p { font-size: 1.2rem; max-width: 80%; margin-bottom: 2rem; }
+      #start-button:hover {
+        background-color: white;
+        color: black;
+      }
+      #start-screen h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+      }
+       #start-screen p {
+        font-size: 1.2rem;
+        max-width: 80%;
+        margin-bottom: 2rem;
+      }
     </style>
   </head>
   <body>
-    <!-- Start screen overlay -->
     <div id="start-screen">
       <h1>Welcome</h1>
       <p>Click the button below to enter the experience and start the music.</p>
@@ -34,9 +60,10 @@
     </div>
 
     <a-scene>
+      
       <a-assets>
         <img id="pattern-texture" src="https://raw.githubusercontent.com/augmentedthinker/sphere/main/pattern.png" crossorigin="anonymous">
-        <audio id="bg-music" src="music.mp3" loop="true"></audio>
+        <audio id="bg-music" src="music.mp3" loop="true" preload="auto"></audio>
       </a-assets>
 
       <a-sphere
@@ -56,7 +83,6 @@
 
       <a-light id="ambient-light" type="ambient" color="#ffffff" intensity="1.0"></a-light>
 
-      <!-- Mute/Unmute Orb -->
       <a-sphere
         id="music-orb"
         position="-0.75 1.5 -2"
@@ -66,7 +92,6 @@
         visible="false">
       </a-sphere>
 
-      <!-- Lighting Toggle Orb -->
       <a-sphere
         id="lighting-orb"
         position="0.75 1.5 -2"
@@ -76,11 +101,9 @@
         visible="false">
       </a-sphere>
 
-      <!-- Color-Changing Orb (NEW) -->
       <a-sphere
         id="color-orb"
-        position="0 1.7 -2"
-        radius="0.2"
+        position="0 1.7 -2" radius="0.2"
         material="color: #35a7ff; emissive: #35a7ff; emissiveIntensity: 0.4;"
         animation="property: position; to: 0 1.8 -2; dir: alternate; loop: true; easing: easeInOutQuad; dur: 1700"
         visible="false">
@@ -89,22 +112,25 @@
       <a-camera position="0 0 0">
         <a-cursor></a-cursor>
       </a-camera>
+
     </a-scene>
 
     <script>
+      // Wait for the window to load before running the script
       window.onload = function() {
         const startScreen = document.getElementById('start-screen');
         const startButton = document.getElementById('start-button');
         const musicEntity = document.getElementById('ambient-music');
         const musicOrb = document.getElementById('music-orb');
-        const lightingOrb = document.getElementById('lighting-orb');
-        const colorOrb = document.getElementById('color-orb');
-        const vrRoom = document.getElementById('vr-room');
-        const ambientLight = document.getElementById('ambient-light');
+        const lightingOrb = document.getElementById('lighting-orb'); 
+        const colorOrb = document.getElementById('color-orb'); // Get the new color orb entity
+        const vrRoom = document.getElementById('vr-room'); 
+        const ambientLight = document.getElementById('ambient-light'); 
+        const sceneEl = document.querySelector('a-scene');
 
-        let isMusicPlaying = false;
-        let isLightMode = true;
-        let orbColorIndex = 0; // Start at 0
+        let isMusicPlaying = false; 
+        let isLightMode = true;     
+        let orbColorIndex = 0; // Index to keep track of the current color for the color orb
 
         // Define the color states for the color orb
         const orbColors = [
@@ -115,62 +141,90 @@
           { color: '#23ce6b', emissive: '#23ce6b', emissiveIntensity: 0.4 }  // green
         ];
 
+
+        // Add a click listener to the start button
         startButton.addEventListener('click', function() {
+          // Check if the sound component is ready
           if (musicEntity.components.sound) {
+            // Play the sound programmatically
             musicEntity.components.sound.playSound();
-            isMusicPlaying = true;
+            isMusicPlaying = true; // Set music to playing
+            // Set music orb color to cyan (music playing)
             musicOrb.setAttribute('material', {color: 'cyan', emissive: 'cyan', emissiveIntensity: 0.5});
           }
+          
+          // Hide the start screen
           startScreen.style.display = 'none';
+          // Make all interactive orbs visible after entering the scene
           musicOrb.setAttribute('visible', true);
           lightingOrb.setAttribute('visible', true);
-          colorOrb.setAttribute('visible', true);
+          colorOrb.setAttribute('visible', true); // Make the color orb visible
 
-          // Optional: Auto-enter VR mode
-          const sceneEl = document.querySelector('a-scene');
-          if (!sceneEl.is('vr-mode') && !sceneEl.is('ar-mode')) {
-            sceneEl.enterVR().catch(function(err) {
-              // Ignore if not available
-            });
+          // Optional: Attempt to enter VR mode automatically after the click
+          // This provides a smoother experience on VR headsets.
+          if (sceneEl.is('vr-mode')) {
+             // Already in VR mode
+          } else if (sceneEl.is('ar-mode')) {
+            // Already in AR mode
+          } else {
+             sceneEl.enterVR().catch(function(err) {
+                 console.error("Could not enter VR mode:", err);
+             });
           }
         });
 
-        // Mute/unmute music orb
+        // Add a click listener for the music toggle orb
         musicOrb.addEventListener('click', function() {
           if (musicEntity.components.sound) {
             if (isMusicPlaying) {
-              musicEntity.components.sound.pauseSound();
+              musicEntity.components.sound.pauseSound(); // Pause the sound
+              // Change music orb color to orange (music muted)
               musicOrb.setAttribute('material', {color: 'orange', emissive: 'orange', emissiveIntensity: 0.3});
             } else {
-              musicEntity.components.sound.playSound();
+              musicEntity.components.sound.playSound(); // Play the sound
+              // Change music orb color to cyan (music playing)
               musicOrb.setAttribute('material', {color: 'cyan', emissive: 'cyan', emissiveIntensity: 0.5});
             }
-            isMusicPlaying = !isMusicPlaying;
+            isMusicPlaying = !isMusicPlaying; // Toggle the state
           }
         });
 
-        // Lighting toggle orb
+        // Add a click listener for the lighting toggle orb
         lightingOrb.addEventListener('click', function() {
           if (isLightMode) {
-            // Dark Mode
-            ambientLight.setAttribute('intensity', 0.1);
-            ambientLight.setAttribute('color', '#666699');
+            // Switch to Dark Mode
+            ambientLight.setAttribute('intensity', 0.1); 
+            ambientLight.setAttribute('color', '#666699'); 
             vrRoom.setAttribute('material', { emissive: '#111122', emissiveIntensity: 0.1 });
+            
+            // Change lighting orb color to deep violet/purple
             lightingOrb.setAttribute('material', { color: '#4a004a', emissive: '#4a004a', emissiveIntensity: 0.6 });
           } else {
-            // Light Mode
-            ambientLight.setAttribute('intensity', 1.0);
-            ambientLight.setAttribute('color', '#ffffff');
+            // Switch to Light Mode
+            ambientLight.setAttribute('intensity', 1.0); 
+            ambientLight.setAttribute('color', '#ffffff'); 
             vrRoom.setAttribute('material', { emissive: '#000000', emissiveIntensity: 0.0 });
+            
+            // Change lighting orb color to white/silver
             lightingOrb.setAttribute('material', { color: 'white', emissive: 'white', emissiveIntensity: 0.3 });
           }
-          isLightMode = !isLightMode;
+          isLightMode = !isLightMode; // Toggle the lighting state
         });
 
-        // Color orb (cycle color)
+        // NEW: Add a click listener for the color changing orb
         colorOrb.addEventListener('click', function() {
+          // Increment index and loop back to 0 if it exceeds array length
           orbColorIndex = (orbColorIndex + 1) % orbColors.length;
-          colorOrb.setAttribute('material', orbColors[orbColorIndex]);
+          
+          // Get the current color properties from the array
+          const newColorProps = orbColors[orbColorIndex];
+          
+          // Update the material attributes of the color orb
+          colorOrb.setAttribute('material', {
+            color: newColorProps.color,
+            emissive: newColorProps.emissive,
+            emissiveIntensity: newColorProps.emissiveIntensity
+          });
         });
       };
     </script>
