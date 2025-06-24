@@ -104,8 +104,9 @@
 
         let isMusicPlaying = false;
         let isLightMode = true;
+        let orbColorIndex = 0; // Start at 0
 
-        // Color orb setup
+        // Define the color states for the color orb
         const orbColors = [
           { color: '#35a7ff', emissive: '#35a7ff', emissiveIntensity: 0.4 }, // blue
           { color: '#ffbe0b', emissive: '#ffbe0b', emissiveIntensity: 0.4 }, // yellow
@@ -113,17 +114,14 @@
           { color: '#8338ec', emissive: '#8338ec', emissiveIntensity: 0.4 }, // purple
           { color: '#23ce6b', emissive: '#23ce6b', emissiveIntensity: 0.4 }  // green
         ];
-        let orbColorIndex = 0;
 
         startButton.addEventListener('click', function() {
-          // Start music
           if (musicEntity.components.sound) {
             musicEntity.components.sound.playSound();
             isMusicPlaying = true;
             musicOrb.setAttribute('material', {color: 'cyan', emissive: 'cyan', emissiveIntensity: 0.5});
           }
           startScreen.style.display = 'none';
-          // Show all three orbs
           musicOrb.setAttribute('visible', true);
           lightingOrb.setAttribute('visible', true);
           colorOrb.setAttribute('visible', true);
