@@ -2,29 +2,80 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Spherical VR Room - Escher Pattern</title>
+    <title>Spherical VR Room - Escher Pattern with Music</title>
     <meta name="description" content="An immersive spherical VR room with Escher-style patterns, built with A-Frame for Oculus Quest 2.">
+    <!-- Make it responsive for different devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <!-- A-Frame VR Framework -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+    <style>
+      /* Style for the start screen overlay */
+      #start-screen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.85);
+        color: white;
+        z-index: 10000;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        text-align: center;
+      }
+      /* Style for the button on the start screen */
+      #start-button {
+        font-size: 1.5rem;
+        padding: 1rem 2rem;
+        border: 2px solid white;
+        background-color: #1a1a1a;
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s, color 0.3s;
+      }
+      #start-button:hover {
+        background-color: white;
+        color: black;
+      }
+      #start-screen h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+      }
+       #start-screen p {
+        font-size: 1.2rem;
+        max-width: 80%;
+        margin-bottom: 2rem;
+      }
+    </style>
   </head>
   <body>
+    <!-- Start screen overlay to get user interaction for audio -->
+    <div id="start-screen">
+      <h1>Welcome</h1>
+      <p>Click the button below to enter the experience and start the music.</p>
+      <button id="start-button">Enter VR Space</button>
+    </div>
+
     <!-- A-Frame scene setup -->
     <a-scene>
       
       <!-- Asset Management System -->
       <a-assets>
-        <!-- Pattern texture from GitHub repository -->
+        <!-- Pattern texture -->
         <img id="pattern-texture" src="https://raw.githubusercontent.com/augmentedthinker/sphere/main/pattern.png" crossorigin="anonymous">
         <!-- Ambient music asset -->
-        <audio id="bg-music" src="music.mp3" preload="auto"></audio>
+        <!-- Note: We removed preload="auto" as the script will handle loading -->
+        <audio id="bg-music" src="music.mp3" loop="true"></audio>
       </a-assets>
 
       <!-- 
         Spherical Room with Pattern Texture
-        - radius: 3 meters (6 meter diameter) - doubled from 1.5m
-        - segments-width/height: Higher values for smoother sphere
-        - side: back - This makes the texture appear on the inside of the sphere
-        - The sphere is centered at 0,0,0 with the camera inside
       -->
       <a-sphere
         position="0 0 0"
@@ -36,25 +87,61 @@
         material="side: back; repeat: 4 2">
       </a-sphere>
 
-      <!-- Ambient music entity (non-positional, looped, autoplay) -->
-      <a-entity 
-        sound="src: #bg-music; autoplay: true; loop: true; positional: false">
+      <!-- 
+        Ambient music entity.
+        - We give it an ID to easily select it with JavaScript.
+        - `autoplay` is removed because we control it via script.
+        - `positional: false` makes it non-spatial ambient sound.
+      -->
+      <a-entity id="ambient-music"
+        sound="src: #bg-music; positional: false; loop: true; volume: 0.5">
       </a-entity>
 
-      <!-- Add some ambient lighting to ensure visibility -->
+      <!-- Ambient lighting -->
       <a-light type="ambient" color="#ffffff" intensity="1.0"></a-light>
 
       <!-- 
-        Camera positioned at center of sphere for better perspective
-        - position: 0 0 0 (centered in the sphere)
-        - look-controls and wasd-controls enabled by default for VR and desktop testing
+        Camera and cursor for interaction.
+        The raycaster is needed for the cursor to interact with objects.
       -->
-      <a-camera
-        position="0 0 0"
-        look-controls="enabled: true"
-        wasd-controls="enabled: true">
+      <a-camera position="0 0 0">
+        <a-cursor></a-cursor>
       </a-camera>
 
     </a-scene>
+
+    <script>
+      // Wait for the window to load before running the script
+      window.onload = function() {
+        const startScreen = document.getElementById('start-screen');
+        const startButton = document.getElementById('start-button');
+        const musicEntity = document.getElementById('ambient-music');
+
+        // Add a click listener to the start button
+        startButton.addEventListener('click', function() {
+          // Check if the sound component is ready
+          if (musicEntity.components.sound) {
+            // Play the sound programmatically
+            musicEntity.components.sound.playSound();
+          }
+          
+          // Hide the start screen
+          startScreen.style.display = 'none';
+
+          // Optional: Attempt to enter VR mode automatically after the click
+          // This provides a smoother experience on VR headsets.
+          const sceneEl = document.querySelector('a-scene');
+          if (sceneEl.is('vr-mode')) {
+             // Already in VR mode
+          } else if (sceneEl.is('ar-mode')) {
+            // Already in AR mode
+          } else {
+             sceneEl.enterVR().catch(function(err) {
+                 console.error("Could not enter VR mode:", err);
+             });
+          }
+        });
+      };
+    </script>
   </body>
 </html>
