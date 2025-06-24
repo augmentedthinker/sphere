@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Spherical VR Room - Escher Pattern</title>
+    <meta name="description" content="An immersive spherical VR room with Escher-style patterns, built with A-Frame for Oculus Quest 2.">
+    <!-- A-Frame VR Framework -->
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  </head>
+  <body>
+    <!-- A-Frame scene setup -->
+    <a-scene>
+      
+      <!-- Asset Management System -->
+      <a-assets>
+        <!-- Pattern texture from GitHub repository -->
+        <img id="pattern-texture" src="https://raw.githubusercontent.com/augmentedthinker/sphere/main/pattern.png" crossorigin="anonymous">
+      </a-assets>
+
+      <!-- 
+        Spherical Room with Pattern Texture
+        - radius: 3 meters (6 meter diameter) - doubled from 1.5m
+        - segments-width/height: Higher values for smoother sphere
+        - side: back - This makes the texture appear on the inside of the sphere
+        - The sphere is centered at 0,0,0 with the camera inside
+      -->
+      <a-sphere
+        position="0 0 0"
+        radius="3"
+        src="#pattern-texture"
+        side="back"
+        segments-width="64"
+        segments-height="32"
+        material="side: back; repeat: 4 2">
+      </a-sphere>
+
+      <!-- Add some ambient lighting to ensure visibility -->
+      <a-light type="ambient" color="#ffffff" intensity="1.0"></a-light>
+
+      <!-- 
+        Camera positioned at center of sphere for better perspective
+        - position: 0 0 0 (centered in the sphere)
+        - look-controls and wasd-controls enabled by default for VR and desktop testing
+      -->
+      <a-camera
+        position="0 0 0"
+        look-controls="enabled: true"
+        wasd-controls="enabled: true">
+      </a-camera>
+
+    </a-scene>
+  </body>
+</html>
