@@ -75,15 +75,18 @@
 
       <!-- 
         Spherical Room with Pattern Texture
+        Added 'id="vr-room"' for easy JavaScript manipulation of its material.
+        Initial emissiveIntensity is 0.0 for daylight.
       -->
       <a-sphere
+        id="vr-room"
         position="0 0 0"
         radius="3"
         src="#pattern-texture"
         side="back"
         segments-width="64"
         segments-height="32"
-        material="side: back; repeat: 4 2">
+        material="side: back; repeat: 4 2; emissive: #000000; emissiveIntensity: 0.0;">
       </a-sphere>
 
       <!-- 
@@ -96,22 +99,41 @@
         sound="src: #bg-music; positional: false; loop: true; volume: 0.5">
       </a-entity>
 
-      <!-- Ambient lighting -->
-      <a-light type="ambient" color="#ffffff" intensity="1.0"></a-light>
+      <!-- 
+        Ambient lighting.
+        Added 'id="ambient-light"' for easy JavaScript manipulation of its properties.
+      -->
+      <a-light id="ambient-light" type="ambient" color="#ffffff" intensity="1.0"></a-light>
 
       <!-- 
         Floating, glowing orb for mute/unmute functionality.
         - Initially hidden (`visible="false"`).
-        - Positioned in front of the camera.
-        - Has an initial orange glow (representing muted/off state).
+        - Positioned in front of the camera, slightly to the left.
+        - Has an initial orange glow (representing muted/off state for music, but only visible after start button).
         - Includes a bobbing animation.
       -->
       <a-sphere
         id="music-orb"
-        position="0 1.5 -2"
+        position="-0.75 1.5 -2"
         radius="0.2"
         material="color: orange; emissive: orange; emissiveIntensity: 0.3;"
-        animation="property: position; to: 0 1.6 -2; dir: alternate; loop: true; easing: easeInOutQuad; dur: 2000"
+        animation="property: position; to: -0.75 1.6 -2; dir: alternate; loop: true; easing: easeInOutQuad; dur: 2000"
+        visible="false">
+      </a-sphere>
+
+      <!--
+        Floating, glowing orb for lighting toggle.
+        - Initially hidden (`visible="false"`).
+        - Positioned in front of the camera, slightly to the right of the music orb.
+        - Has an initial white/silver glow (representing light mode, visible after start button).
+        - Includes a bobbing animation (slightly different duration for variation).
+      -->
+      <a-sphere
+        id="lighting-orb"
+        position="0.75 1.5 -2"
+        radius="0.2"
+        material="color: white; emissive: white; emissiveIntensity: 0.3;"
+        animation="property: position; to: 0.75 1.65 -2; dir: alternate; loop: true; easing: easeInOutSine; dur: 2300"
         visible="false">
       </a-sphere>
 
@@ -131,9 +153,13 @@
         const startScreen = document.getElementById('start-screen');
         const startButton = document.getElementById('start-button');
         const musicEntity = document.getElementById('ambient-music');
-        const musicOrb = document.getElementById('music-orb'); // Get the new orb entity
+        const musicOrb = document.getElementById('music-orb');
+        const lightingOrb = document.getElementById('lighting-orb'); // Get the new lighting orb entity
+        const vrRoom = document.getElementById('vr-room'); // Get the room sphere entity
+        const ambientLight = document.getElementById('ambient-light'); // Get the ambient light entity
 
         let isMusicPlaying = false; // Track music state
+        let isLightMode = true;     // Track lighting state (starts as light mode)
 
         // Add a click listener to the start button
         startButton.addEventListener('click', function() {
@@ -142,14 +168,15 @@
             // Play the sound programmatically
             musicEntity.components.sound.playSound();
             isMusicPlaying = true; // Set music to playing
-            // Set orb color to cyan (music playing)
+            // Set music orb color to cyan (music playing)
             musicOrb.setAttribute('material', {color: 'cyan', emissive: 'cyan', emissiveIntensity: 0.5});
           }
           
           // Hide the start screen
           startScreen.style.display = 'none';
-          // Make the music orb visible after entering the scene
+          // Make both interactive orbs visible after entering the scene
           musicOrb.setAttribute('visible', true);
+          lightingOrb.setAttribute('visible', true);
 
           // Optional: Attempt to enter VR mode automatically after the click
           // This provides a smoother experience on VR headsets.
@@ -165,20 +192,42 @@
           }
         });
 
-        // Add a click listener for the glowing music orb
+        // Add a click listener for the music toggle orb
         musicOrb.addEventListener('click', function() {
           if (musicEntity.components.sound) {
             if (isMusicPlaying) {
               musicEntity.components.sound.pauseSound(); // Pause the sound
-              // Change orb color to orange (music muted)
+              // Change music orb color to orange (music muted)
               musicOrb.setAttribute('material', {color: 'orange', emissive: 'orange', emissiveIntensity: 0.3});
             } else {
               musicEntity.components.sound.playSound(); // Play the sound
-              // Change orb color to cyan (music playing)
+              // Change music orb color to cyan (music playing)
               musicOrb.setAttribute('material', {color: 'cyan', emissive: 'cyan', emissiveIntensity: 0.5});
             }
             isMusicPlaying = !isMusicPlaying; // Toggle the state
           }
+        });
+
+        // Add a click listener for the lighting toggle orb
+        lightingOrb.addEventListener('click', function() {
+          if (isLightMode) {
+            // Switch to Dark Mode
+            ambientLight.setAttribute('intensity', 0.1); // Significantly dim the ambient light
+            ambientLight.setAttribute('color', '#666699'); // Shift light color to a cool blue/purple
+            vrRoom.setAttribute('material', { emissive: '#111122', emissiveIntensity: 0.1 }); // Make patterns subtly glow
+            
+            // Change lighting orb color to deep violet/purple
+            lightingOrb.setAttribute('material', { color: '#4a004a', emissive: '#4a004a', emissiveIntensity: 0.6 });
+          } else {
+            // Switch to Light Mode
+            ambientLight.setAttribute('intensity', 1.0); // Restore bright ambient light
+            ambientLight.setAttribute('color', '#ffffff'); // Restore white light
+            vrRoom.setAttribute('material', { emissive: '#000000', emissiveIntensity: 0.0 }); // Remove pattern glow
+            
+            // Change lighting orb color to white/silver
+            lightingOrb.setAttribute('material', { color: 'white', emissive: 'white', emissiveIntensity: 0.3 });
+          }
+          isLightMode = !isLightMode; // Toggle the lighting state
         });
       };
     </script>
