@@ -2,15 +2,16 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Interactive VR Sphere</title>
-    <meta name="description" content="An interactive immersive spherical VR room with a mute/unmute feature.">
+    <title>Spherical VR Room - Escher Pattern with Music</title>
+    <meta name="description" content="An immersive spherical VR room with Escher-style patterns, built with A-Frame for Oculus Quest 2.">
+    <!-- Make it responsive for different devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- A-Frame VR Framework -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 
     <style>
-      /* Styles for the start screen overlay */
+      /* Style for the start screen overlay */
       #start-screen {
         position: absolute;
         top: 0;
@@ -27,6 +28,7 @@
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         text-align: center;
       }
+      /* Style for the button on the start screen */
       #start-button {
         font-size: 1.5rem;
         padding: 1rem 2rem;
@@ -65,11 +67,15 @@
       
       <!-- Asset Management System -->
       <a-assets>
+        <!-- Pattern texture -->
         <img id="pattern-texture" src="https://raw.githubusercontent.com/augmentedthinker/sphere/main/pattern.png" crossorigin="anonymous">
+        <!-- Ambient music asset -->
         <audio id="bg-music" src="music.mp3" loop="true"></audio>
       </a-assets>
 
-      <!-- Spherical Room -->
+      <!-- 
+        Spherical Room with Pattern Texture
+      -->
       <a-sphere
         position="0 0 0"
         radius="3"
@@ -77,34 +83,15 @@
         side="back"
         segments-width="64"
         segments-height="32"
-        material="side: back; repeat: 4 2;">
+        material="side: back; repeat: 4 2">
       </a-sphere>
 
       <!-- 
-        NEW: Interactive Mute Orb
-        - It's a sphere positioned in front of the camera.
-        - The material has `shader: flat` for a clean look and `emissive` to make it glow.
-        - It has an ID so we can select it with JavaScript.
-        - The nested <a-animation> makes it gently bob up and down.
+        Ambient music entity.
+        - We give it an ID to easily select it with JavaScript.
+        - `autoplay` is removed because we control it via script.
+        - `positional: false` makes it non-spatial ambient sound.
       -->
-      <a-sphere
-        id="mute-orb"
-        position="0 1.6 -2.5"
-        radius="0.2"
-        material="color: #00FFFF; shader: flat; emissive: #00FFFF; emissiveIntensity: 0.7; opacity: 0.8"
-        >
-          <a-animation
-            attribute="position"
-            from="0 1.55 -2.5"
-            to="0 1.65 -2.5"
-            direction="alternate"
-            dur="2000"
-            repeat="indefinite"
-            easing="ease-in-out-sine">
-          </a-animation>
-      </a-sphere>
-
-      <!-- Ambient music entity -->
       <a-entity id="ambient-music"
         sound="src: #bg-music; positional: false; loop: true; volume: 0.5">
       </a-entity>
@@ -113,11 +100,26 @@
       <a-light type="ambient" color="#ffffff" intensity="1.0"></a-light>
 
       <!-- 
-        Camera and Cursor
-        - The <a-cursor> is a child of the camera. It's what allows for gaze-based interaction.
-        - It will automatically show a ring when hovering over clickable objects.
+        Floating, glowing orb for mute/unmute functionality.
+        - Initially hidden (`visible="false"`).
+        - Positioned in front of the camera.
+        - Has an initial orange glow (representing muted/off state).
+        - Includes a bobbing animation.
       -->
-      <a-camera position="0 1.6 0">
+      <a-sphere
+        id="music-orb"
+        position="0 1.5 -2"
+        radius="0.2"
+        material="color: orange; emissive: orange; emissiveIntensity: 0.3;"
+        animation="property: position; to: 0 1.6 -2; dir: alternate; loop: true; easing: easeInOutQuad; dur: 2000"
+        visible="false">
+      </a-sphere>
+
+      <!-- 
+        Camera and cursor for interaction.
+        The raycaster is needed for the cursor to interact with objects.
+      -->
+      <a-camera position="0 0 0">
         <a-cursor></a-cursor>
       </a-camera>
 
@@ -128,50 +130,54 @@
       window.onload = function() {
         const startScreen = document.getElementById('start-screen');
         const startButton = document.getElementById('start-button');
-        
+        const musicEntity = document.getElementById('ambient-music');
+        const musicOrb = document.getElementById('music-orb'); // Get the new orb entity
+
+        let isMusicPlaying = false; // Track music state
+
         // Add a click listener to the start button
         startButton.addEventListener('click', function() {
-          const musicEntity = document.getElementById('ambient-music');
-          const muteOrb = document.getElementById('mute-orb');
-
-          // --- Music State and Orb Interaction ---
-          let isMusicPlaying = false; // Music is initially off
-          const colorPlaying = '#00FFFF'; // Cyan
-          const colorPaused = '#FF5733';  // Warm Orange
-
-          // Function to start the music for the first time
-          const startMusic = () => {
-              if (musicEntity.components.sound && !isMusicPlaying) {
-                  musicEntity.components.sound.playSound();
-                  isMusicPlaying = true;
-                  muteOrb.setAttribute('material', 'color', colorPlaying);
-                  muteOrb.setAttribute('material', 'emissive', colorPlaying);
-              }
-          };
-
-          // --- Initialize Orb Interaction ---
-          muteOrb.addEventListener('click', function() {
-              if (isMusicPlaying) {
-                  musicEntity.components.sound.pauseSound();
-                  muteOrb.setAttribute('material', 'color', colorPaused);
-                  muteOrb.setAttribute('material', 'emissive', colorPaused);
-              } else {
-                  musicEntity.components.sound.playSound();
-                  muteOrb.setAttribute('material', 'color', colorPlaying);
-                  muteOrb.setAttribute('material', 'emissive', colorPlaying);
-              }
-              // Flip the state
-              isMusicPlaying = !isMusicPlaying;
-          });
+          // Check if the sound component is ready
+          if (musicEntity.components.sound) {
+            // Play the sound programmatically
+            musicEntity.components.sound.playSound();
+            isMusicPlaying = true; // Set music to playing
+            // Set orb color to cyan (music playing)
+            musicOrb.setAttribute('material', {color: 'cyan', emissive: 'cyan', emissiveIntensity: 0.5});
+          }
           
-          // --- Start Everything ---
-          startMusic();
+          // Hide the start screen
           startScreen.style.display = 'none';
+          // Make the music orb visible after entering the scene
+          musicOrb.setAttribute('visible', true);
 
-          // Attempt to enter VR mode
+          // Optional: Attempt to enter VR mode automatically after the click
+          // This provides a smoother experience on VR headsets.
           const sceneEl = document.querySelector('a-scene');
-          if (!sceneEl.is('vr-mode')) {
-             sceneEl.enterVR().catch(err => console.error("Could not enter VR mode:", err));
+          if (sceneEl.is('vr-mode')) {
+             // Already in VR mode
+          } else if (sceneEl.is('ar-mode')) {
+            // Already in AR mode
+          } else {
+             sceneEl.enterVR().catch(function(err) {
+                 console.error("Could not enter VR mode:", err);
+             });
+          }
+        });
+
+        // Add a click listener for the glowing music orb
+        musicOrb.addEventListener('click', function() {
+          if (musicEntity.components.sound) {
+            if (isMusicPlaying) {
+              musicEntity.components.sound.pauseSound(); // Pause the sound
+              // Change orb color to orange (music muted)
+              musicOrb.setAttribute('material', {color: 'orange', emissive: 'orange', emissiveIntensity: 0.3});
+            } else {
+              musicEntity.components.sound.playSound(); // Play the sound
+              // Change orb color to cyan (music playing)
+              musicOrb.setAttribute('material', {color: 'cyan', emissive: 'cyan', emissiveIntensity: 0.5});
+            }
+            isMusicPlaying = !isMusicPlaying; // Toggle the state
           }
         });
       };
