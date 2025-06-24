@@ -2,88 +2,43 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Spherical VR Room - Escher Pattern with Interactive Orbs</title>
+    <title>Spherical VR Room - Escher Pattern with Music</title>
     <meta name="description" content="An immersive spherical VR room with Escher-style patterns, built with A-Frame for Oculus Quest 2.">
-    <!-- Make it responsive for different devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- A-Frame VR Framework -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-
     <style>
-      /* Style for the start screen overlay */
       #start-screen {
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.85);
-        color: white;
-        z-index: 10000;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-color: rgba(0, 0, 0, 0.85); color: white; z-index: 10000;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         text-align: center;
       }
-      /* Style for the button on the start screen */
       #start-button {
-        font-size: 1.5rem;
-        padding: 1rem 2rem;
-        border: 2px solid white;
-        background-color: #1a1a1a;
-        color: white;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background-color 0.3s, color 0.3s;
+        font-size: 1.5rem; padding: 1rem 2rem;
+        border: 2px solid white; background-color: #1a1a1a; color: white;
+        border-radius: 8px; cursor: pointer; transition: background-color 0.3s, color 0.3s;
       }
-      #start-button:hover {
-        background-color: white;
-        color: black;
-      }
-      #start-screen h1 {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-      }
-       #start-screen p {
-        font-size: 1.2rem;
-        max-width: 80%;
-        margin-bottom: 2rem;
-      }
+      #start-button:hover { background-color: white; color: black; }
+      #start-screen h1 { font-size: 3rem; margin-bottom: 1rem; }
+      #start-screen p { font-size: 1.2rem; max-width: 80%; margin-bottom: 2rem; }
     </style>
   </head>
   <body>
-    <!-- Start screen overlay to get user interaction for audio -->
+    <!-- Start screen overlay -->
     <div id="start-screen">
       <h1>Welcome</h1>
-      <p>Click the button below to enter the experience and interact with the sphere.</p>
+      <p>Click the button below to enter the experience and start the music.</p>
       <button id="start-button">Enter VR Space</button>
     </div>
 
-    <!-- A-Frame scene setup -->
     <a-scene>
-      
-      <!-- Asset Management System -->
       <a-assets>
-        <!-- Pattern texture for the spherical room -->
         <img id="pattern-texture" src="https://raw.githubusercontent.com/augmentedthinker/sphere/main/pattern.png" crossorigin="anonymous">
-        <!-- Ambient music asset -->
         <audio id="bg-music" src="music.mp3" loop="true"></audio>
-
-        <!-- Textures for the interactive orbs -->
-        <!-- These are placeholder URLs. You can replace them with your own images. -->
-        <img id="music-icon-texture" src="https://placehold.co/128x128/000000/FFFFFF?text=🎵" crossorigin="anonymous">
-        <img id="light-icon-texture" src="https://placehold.co/128x128/000000/FFFFFF?text=☀️🌙" crossorigin="anonymous">
-        <img id="message-icon-texture" src="https://placehold.co/128x128/000000/FFFFFF?text=💬" crossorigin="anonymous">
       </a-assets>
 
-      <!-- 
-        Spherical Room with Pattern Texture
-        Added 'id="vr-room"' for easy JavaScript manipulation of its material.
-        Initial emissiveIntensity is 0.0 for daylight.
-      -->
       <a-sphere
         id="vr-room"
         position="0 0 0"
@@ -95,239 +50,130 @@
         material="side: back; repeat: 4 2; emissive: #000000; emissiveIntensity: 0.0;">
       </a-sphere>
 
-      <!-- 
-        Ambient music entity.
-        - We give it an ID to easily select it with JavaScript.
-        - `autoplay` is removed because we control it via script.
-        - `positional: false` makes it non-spatial ambient sound.
-      -->
       <a-entity id="ambient-music"
         sound="src: #bg-music; positional: false; loop: true; volume: 0.5">
       </a-entity>
 
-      <!-- 
-        Ambient lighting.
-        Added 'id="ambient-light"' for easy JavaScript manipulation of its properties.
-      -->
       <a-light id="ambient-light" type="ambient" color="#ffffff" intensity="1.0"></a-light>
 
-      <!-- 
-        Floating, glowing orb for mute/unmute functionality (Music Orb).
-        - Uses a music note texture.
-        - Initially hidden (`visible="false"`).
-        - Positioned in front of the camera, slightly to the left.
-        - Has an initial orange glow (representing muted/off state for music, but only visible after start button).
-        - Includes a bobbing animation.
-      -->
+      <!-- Mute/Unmute Orb -->
       <a-sphere
         id="music-orb"
         position="-0.75 1.5 -2"
         radius="0.2"
-        src="#music-icon-texture"
-        material="emissive: orange; emissiveIntensity: 0.3;"
+        material="color: orange; emissive: orange; emissiveIntensity: 0.3;"
         animation="property: position; to: -0.75 1.6 -2; dir: alternate; loop: true; easing: easeInOutQuad; dur: 2000"
         visible="false">
       </a-sphere>
 
-      <!--
-        Floating, glowing orb for lighting toggle (Lighting Orb).
-        - Uses a sun/moon icon texture.
-        - Initially hidden (`visible="false"`).
-        - Positioned in front of the camera, slightly to the right of the music orb.
-        - Has an initial white/silver glow (representing light mode, visible after start button).
-        - Includes a bobbing animation (slightly different duration for variation).
-      -->
+      <!-- Lighting Toggle Orb -->
       <a-sphere
         id="lighting-orb"
         position="0.75 1.5 -2"
         radius="0.2"
-        src="#light-icon-texture"
-        material="emissive: white; emissiveIntensity: 0.3;"
+        material="color: white; emissive: white; emissiveIntensity: 0.3;"
         animation="property: position; to: 0.75 1.65 -2; dir: alternate; loop: true; easing: easeInOutSine; dur: 2300"
         visible="false">
       </a-sphere>
 
-      <!--
-        Floating, glowing orb for triggering messages (Message Orb).
-        - Uses a speech bubble icon texture.
-        - Initially hidden (`visible="false"`).
-        - Positioned in front of the camera, centrally but lower.
-        - Has an initial green glow.
-        - Includes a bobbing animation (unique duration).
-      -->
+      <!-- Color-Changing Orb (NEW) -->
       <a-sphere
-        id="message-orb"
-        position="0 0.5 -2"
+        id="color-orb"
+        position="0 1.7 -2"
         radius="0.2"
-        src="#message-icon-texture"
-        material="emissive: #00ff00; emissiveIntensity: 0.4;"
-        animation="property: position; to: 0 0.6 -2; dir: alternate; loop: true; easing: easeInOutCubic; dur: 2600"
+        material="color: #35a7ff; emissive: #35a7ff; emissiveIntensity: 0.4;"
+        animation="property: position; to: 0 1.8 -2; dir: alternate; loop: true; easing: easeInOutQuad; dur: 1700"
         visible="false">
       </a-sphere>
 
-      <!--
-        Text entity for floating messages.
-        - Initially hidden and transparent.
-        - Animations defined to control fading in and out.
-      -->
-      <a-text id="floating-message"
-              position="0 2.2 -2.5"
-              width="3"
-              value=""
-              color="white"
-              align="center"
-              visible="false"
-              material="opacity: 0.0; transparent: true;">
-          <a-animation attribute="material.opacity" from="0.0" to="1.0" dur="500" begin="show-text"></a-animation>
-          <a-animation attribute="material.opacity" from="1.0" to="0.0" dur="500" delay="4500" begin="hide-text"></a-animation>
-      </a-text>
-
-      <!-- 
-        Camera and cursor for interaction.
-        The raycaster is needed for the cursor to interact with objects.
-      -->
       <a-camera position="0 0 0">
         <a-cursor></a-cursor>
       </a-camera>
-
     </a-scene>
 
     <script>
-      // Wait for the window to load before running the script
       window.onload = function() {
         const startScreen = document.getElementById('start-screen');
         const startButton = document.getElementById('start-button');
         const musicEntity = document.getElementById('ambient-music');
         const musicOrb = document.getElementById('music-orb');
         const lightingOrb = document.getElementById('lighting-orb');
-        const messageOrb = document.getElementById('message-orb'); // Get the new message orb entity
+        const colorOrb = document.getElementById('color-orb');
         const vrRoom = document.getElementById('vr-room');
         const ambientLight = document.getElementById('ambient-light');
-        const floatingMessageText = document.getElementById('floating-message'); // Get the floating text entity
 
-        let isMusicPlaying = false; // Track music state
-        let isLightMode = true;     // Track lighting state (starts as light mode)
-        let currentMessageIndex = 0; // Track which message is currently displayed
+        let isMusicPlaying = false;
+        let isLightMode = true;
 
-        // Array of poetic messages to cycle through
-        const messages = [
-          "Seek not to find, but to remember.",
-          "The pattern unfolds from within.",
-          "Listen to the echoes of silence.",
-          "Every journey begins with a single thought.",
-          "What shape does your wonder take?"
+        // Color orb setup
+        const orbColors = [
+          { color: '#35a7ff', emissive: '#35a7ff', emissiveIntensity: 0.4 }, // blue
+          { color: '#ffbe0b', emissive: '#ffbe0b', emissiveIntensity: 0.4 }, // yellow
+          { color: '#ff006e', emissive: '#ff006e', emissiveIntensity: 0.4 }, // magenta
+          { color: '#8338ec', emissive: '#8338ec', emissiveIntensity: 0.4 }, // purple
+          { color: '#23ce6b', emissive: '#23ce6b', emissiveIntensity: 0.4 }  // green
         ];
+        let orbColorIndex = 0;
 
-        // Add a click listener to the start button
         startButton.addEventListener('click', function() {
-          // Check if the sound component is ready
+          // Start music
           if (musicEntity.components.sound) {
-            // Play the sound programmatically
             musicEntity.components.sound.playSound();
-            isMusicPlaying = true; // Set music to playing
-            // Set music orb emissive to cyan (music playing)
-            musicOrb.setAttribute('material', 'emissive', 'cyan');
-            musicOrb.setAttribute('material', 'emissiveIntensity', 0.5);
+            isMusicPlaying = true;
+            musicOrb.setAttribute('material', {color: 'cyan', emissive: 'cyan', emissiveIntensity: 0.5});
           }
-          
-          // Hide the start screen
           startScreen.style.display = 'none';
-          // Make all interactive orbs visible after entering the scene
+          // Show all three orbs
           musicOrb.setAttribute('visible', true);
           lightingOrb.setAttribute('visible', true);
-          messageOrb.setAttribute('visible', true);
+          colorOrb.setAttribute('visible', true);
 
-          // Optional: Attempt to enter VR mode automatically after the click
-          // This provides a smoother experience on VR headsets.
+          // Optional: Auto-enter VR mode
           const sceneEl = document.querySelector('a-scene');
-          if (sceneEl.is('vr-mode')) {
-             // Already in VR mode
-          } else if (sceneEl.is('ar-mode')) {
-            // Already in AR mode
-          } else {
-             sceneEl.enterVR().catch(function(err) {
-                 console.error("Could not enter VR mode:", err);
-             });
+          if (!sceneEl.is('vr-mode') && !sceneEl.is('ar-mode')) {
+            sceneEl.enterVR().catch(function(err) {
+              // Ignore if not available
+            });
           }
         });
 
-        // Add a click listener for the music toggle orb
+        // Mute/unmute music orb
         musicOrb.addEventListener('click', function() {
           if (musicEntity.components.sound) {
             if (isMusicPlaying) {
-              musicEntity.components.sound.pauseSound(); // Pause the sound
-              // Change music orb emissive to orange (music muted)
-              musicOrb.setAttribute('material', 'emissive', 'orange');
-              musicOrb.setAttribute('material', 'emissiveIntensity', 0.3);
+              musicEntity.components.sound.pauseSound();
+              musicOrb.setAttribute('material', {color: 'orange', emissive: 'orange', emissiveIntensity: 0.3});
             } else {
-              musicEntity.components.sound.playSound(); // Play the sound
-              // Change music orb emissive to cyan (music playing)
-              musicOrb.setAttribute('material', 'emissive', 'cyan');
-              musicOrb.setAttribute('material', 'emissiveIntensity', 0.5);
+              musicEntity.components.sound.playSound();
+              musicOrb.setAttribute('material', {color: 'cyan', emissive: 'cyan', emissiveIntensity: 0.5});
             }
-            isMusicPlaying = !isMusicPlaying; // Toggle the state
+            isMusicPlaying = !isMusicPlaying;
           }
         });
 
-        // Add a click listener for the lighting toggle orb
+        // Lighting toggle orb
         lightingOrb.addEventListener('click', function() {
           if (isLightMode) {
-            // Switch to Dark Mode
-            ambientLight.setAttribute('intensity', 0.1); // Significantly dim the ambient light
-            ambientLight.setAttribute('color', '#666699'); // Shift light color to a cool blue/purple
-            vrRoom.setAttribute('material', { emissive: '#111122', emissiveIntensity: 0.1 }); // Make patterns subtly glow
-            
-            // Change lighting orb emissive to deep violet/purple
-            lightingOrb.setAttribute('material', 'emissive', '#4a004a');
-            lightingOrb.setAttribute('material', 'emissiveIntensity', 0.6);
+            // Dark Mode
+            ambientLight.setAttribute('intensity', 0.1);
+            ambientLight.setAttribute('color', '#666699');
+            vrRoom.setAttribute('material', { emissive: '#111122', emissiveIntensity: 0.1 });
+            lightingOrb.setAttribute('material', { color: '#4a004a', emissive: '#4a004a', emissiveIntensity: 0.6 });
           } else {
-            // Switch to Light Mode
-            ambientLight.setAttribute('intensity', 1.0); // Restore bright ambient light
-            ambientLight.setAttribute('color', '#ffffff'); // Restore white light
-            vrRoom.setAttribute('material', { emissive: '#000000', emissiveIntensity: 0.0 }); // Remove pattern glow
-            
-            // Change lighting orb emissive to white/silver
-            lightingOrb.setAttribute('material', 'emissive', 'white');
-            lightingOrb.setAttribute('material', 'emissiveIntensity', 0.3);
+            // Light Mode
+            ambientLight.setAttribute('intensity', 1.0);
+            ambientLight.setAttribute('color', '#ffffff');
+            vrRoom.setAttribute('material', { emissive: '#000000', emissiveIntensity: 0.0 });
+            lightingOrb.setAttribute('material', { color: 'white', emissive: 'white', emissiveIntensity: 0.3 });
           }
-          isLightMode = !isLightMode; // Toggle the lighting state
+          isLightMode = !isLightMode;
         });
 
-        // Add a click listener for the message orb
-        messageOrb.addEventListener('click', function() {
-          // If a message is currently visible, hide it first to reset animations
-          if (floatingMessageText.getAttribute('visible')) {
-            floatingMessageText.emit('hide-text');
-            // Wait for the fade-out to complete before showing the next message
-            setTimeout(() => {
-                displayNextMessage();
-            }, 600); // Slightly longer than hide-text animation duration (500ms + buffer)
-          } else {
-              displayNextMessage();
-          }
+        // Color orb (cycle color)
+        colorOrb.addEventListener('click', function() {
+          orbColorIndex = (orbColorIndex + 1) % orbColors.length;
+          colorOrb.setAttribute('material', orbColors[orbColorIndex]);
         });
-
-        // Function to display the next message in the sequence
-        function displayNextMessage() {
-            // Set the new message value from the array
-            floatingMessageText.setAttribute('value', messages[currentMessageIndex]);
-            // Make the text visible (this also makes it available for animation)
-            floatingMessageText.setAttribute('visible', true);
-            // Trigger the show animation
-            floatingMessageText.emit('show-text');
-
-            // Increment index and loop back to the start if needed
-            currentMessageIndex = (currentMessageIndex + 1) % messages.length;
-
-            // Trigger the hide animation after a delay, ensuring it fades out
-            setTimeout(() => {
-                floatingMessageText.emit('hide-text');
-                // Hide fully after animation completes to reset visibility for next click
-                setTimeout(() => {
-                    floatingMessageText.setAttribute('visible', false);
-                }, 600); // Wait for hide animation (500ms + buffer)
-            }, 4500); // Display duration before starting fade-out (matches A-Frame animation delay)
-        }
       };
     </script>
   </body>
