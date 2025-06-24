@@ -15,6 +15,8 @@
       <a-assets>
         <!-- Pattern texture from GitHub repository -->
         <img id="pattern-texture" src="https://raw.githubusercontent.com/augmentedthinker/sphere/main/pattern.png" crossorigin="anonymous">
+        <!-- Ambient music asset -->
+        <audio id="bg-music" src="music.mp3" preload="auto"></audio>
       </a-assets>
 
       <!-- 
@@ -33,6 +35,11 @@
         segments-height="32"
         material="side: back; repeat: 4 2">
       </a-sphere>
+
+      <!-- Ambient music entity (non-positional, looped, autoplay) -->
+      <a-entity 
+        sound="src: #bg-music; autoplay: true; loop: true; positional: false">
+      </a-entity>
 
       <!-- Add some ambient lighting to ensure visibility -->
       <a-light type="ambient" color="#ffffff" intensity="1.0"></a-light>
